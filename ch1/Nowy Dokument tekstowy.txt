@@ -1,0 +1,494 @@
+\chapter{Basic principles for approximating differential equations}
+
+\label{chap:chap_11}
+\pagenumbering{arabic}
+\setcounter{page}{90}
+
+\noindent The finite element method is a very flexible approach for solving partial differential equations. Its two most attractive features are the ease of handling domains of complex shape in two and three dimensions and the ease of constructing higherorder discretization methods. The finite element method is usually applied for discretization in space, and therefore spatial problems will be our focus in the coming sections. Extensions to time-dependent problems may, for instance, use finite difference approximations in time.
+
+Before studying how finite element methods are used to tackle differential equation, we first look at how global basis functions and the least squares, Galerkin, and collocation principles can be used to solve differential equations.
+
+\section[Basic principles for approximating differential equations]{Differential equation models}
+\label{sec:sec_11_1}
+	Let us consider an abstract differential equation for a function $u(x)$ of one variable, written as
+	
+	\begin{equation}\label{eqa117}
+	\begin{aligned}
+		\mathcal{L}(u)=0, \quad x \in \Omega .
+	\end{aligned}
+	\end{equation}
+
+	Here are a few examples on possible choices of $\mathcal{L}(u)$, of increasing complexity:
+	
+	
+	\begin{equation}\label{eqa118}
+	\begin{aligned}
+		\mathcal{L}(u) &=\frac{d^{2} u}{d x^{2}}-f(x) \\
+	\end{aligned}
+	\end{equation}
+
+	\begin{equation}\label{eqa119}
+	\begin{aligned}
+		\mathcal{L}(u) &=\frac{d}{d x}\left(\alpha(x) \frac{d u}{d x}\right)+f(x) \\
+	\end{aligned}
+	\end{equation}
+
+	\begin{equation}\label{eqa120}
+	\begin{aligned}
+		\mathcal{L}(u) &=\frac{d}{d x}\left(\alpha(u) \frac{d u}{d x}\right)-a u+f(x) \\
+	\end{aligned}
+	\end{equation}
+
+	\begin{equation}\label{eqa121}
+	\begin{aligned}
+		\mathcal{L}(u) &=\frac{d}{d x}\left(\alpha(u) \frac{d u}{d x}\right)+f(u, x)
+	\end{aligned}
+	\end{equation}
+
+\noindent Both $\alpha(x)$ and $f(x)$ are considered as specified functions, while $a$ is a prescribed parameter. Differential equations corresponding to (118)-(119) arise in diffusion phenomena, such as steady transport of heat in solids and flow of viscous fluids between flat plates. The form $(120)$ arises when transient diffusion or wave phenomenon are discretized in time by finite differences. The equation (121) appear in chemical models when diffusion of a substance is combined with chemical reactions. Also in biology, (121) plays an important role, both for spreading of species and in models involving generation and propagation of electrical signals.
+Let $\Omega=[0, L]$ be the domain in one space dimension. In addition to the differential equation, $u$ must fulfill boundary conditions at the boundaries of the domain, $x=0$ and $x=L$. When $\mathcal{L}$ contains up to second-order derivatives, as in the examples above, $m=1$, we need one boundary condition at each of the (two) boundary points, here abstractly specified as
+
+\begin{equation}\label{eqa122}
+	\begin{aligned}
+		\mathcal{B}_{0}(u)=0, x=0, \quad \mathcal{B}_{1}(u)=0, x=L
+	\end{aligned}
+\end{equation}
+
+There are three common choices of boundary conditions:
+$$
+\begin{array}{lrlrl}
+	\mathcal{B}_{i}(u) & =u-g, & \text { Dirichlet condition } \\
+	\mathcal{B}_{i}(u) & =-\alpha \frac{d u}{d x}-g, & \text { Neumann condition } \\
+	\mathcal{B}_{i}(u) & =-\alpha \frac{d u}{d x}-h(u-g), & \text { Robin condition }
+\end{array}
+$$
+Here, $g$ and $a$ are specified quantities.
+From now on we shall use $u_{e}(x)$ as symbol for the exact solution, fulfilling
+$$
+\mathcal{L}\left(u_{\mathrm{e}}\right)=0, \quad x \in \Omega,
+$$
+while $u(x)$ is our notation for an approximate solution of the differential equation.
+
+\begin{mybox}
+	\textbf{Remark on notation.}
+	
+	\noindent In the literature about the finite element method, is common to use $u$ as the exact solution and $u_{h}$ as the approximate solution, where $h$ is a discretization parameter. However, the vast part of the present text is about the approximate solutions, and having a subscript $h$ attached all the time is cumbersome. Of equal importance is the close correspondence between implementation and mathematics that we strive to achieve in this text: when it is natural to use u and not u\_h in code, we let the mathematical notation be dictated by the code's preferred notation. After all, it is the powerful computer implementations of the finite element method that justifies studying the mathematical formulation and aspects of the method.
+
+\end{mybox}
+\section[Basic principles for approximating differential equations]{Simple model problems}
+\label{sec:sec_11_2}
+$11.2$ Simple model problems
+A common model problem used much in the forthcoming examples is
+$$
+-u^{\prime \prime}(x)=f(x), \quad x \in \Omega=[0, L], \quad u(0)=0, u(L)=D .
+$$
+A closely related problem with a different boundary condition at $x=0$ reads
+$$
+-u^{\prime \prime}(x)=f(x), \quad x \in \Omega=[0, L], \quad u^{\prime}(0)=C, u(L)=D .
+$$
+A third variant has a variable coefficient,
+$$
+-\left(\alpha(x) u^{\prime}(x)\right)^{\prime}=f(x), \quad x \in \Omega=[0, L], \quad u^{\prime}(0)=C, u(L)=D .
+$$
+We can easily solve these using sympy. For (127) we can write the function
+
+\begin{lstlisting}[numbers=none]
+	def model1(f, L, D):
+		"""Solve -u'' = f(x), u(0)=0, u(L)=D."""
+		u_x = - sp.integrate(f, (x, 0, x)) + c_0
+		u = sp.integrate(u_x, (x, 0, x)) + c_1
+		r = sp.solve([u.subs(x, 0)-0, u.subs(x,L)-D], [c_0, c_1])
+		u = u.subs(c_0, r[c_0]).subs(c_1, r[c_1])
+		u = sp.simplify(sp.expand(u))
+		return u
+\end{lstlisting}
+Calling model1 (2, L, D) results in the solution
+$$
+u(x)=\frac{1}{L} x\left(D+L^{2}-L x\right)
+$$
+Model (128) can be solved by
+
+\begin{lstlisting}[numbers=none]
+	def model2(f, L, C, D):
+		"""Solve -u'' = f(x), u'(0)=C, u(L)=D."""
+		u_x = - sp.integrate(f, (x, 0, x)) + c_0
+		u = sp.integrate(u_x, (x, 0, x)) + c_1
+		r = sp.solve([sp.diff(u,x).subs(x, 0)-C, u.subs(x,L)-D], [c_0, c_1])
+		u = u.subs(c_0, r[c_0]).subs(c_1, r[c_1])
+		u = sp.simplify(sp.expand(u))
+		return u
+\end{lstlisting}
+
+to yield
+$$
+u(x)=-x^{2}+C x-C L+D+L^{2},
+$$
+if $f(x)=2$. Model (129) requires a bit more involved code,
+
+
+\begin{lstlisting}[numbers=none]
+	def model3(f, a, L, C, D):
+		"""Solve -(a*u')' = f(x), u(0)=C, u(L)=D."""
+		au_x = - sp.integrate(f, (x, 0, x)) + c_0
+		u = sp.integrate(au_x/a, (x, 0, x)) + c_1
+		r = sp.solve([u.subs(x, 0)-C, u.subs(x,L)-D], [c_0, c_1])
+		u = u.subs(c_0, r[c_0]).subs(c_1, r[c_1])
+		u = sp.simplify(sp.expand(u))
+		return u
+\end{lstlisting}
+
+With $f(x)=0$ and $\alpha(x)=1+x^{2}$ we get
+
+$$u(x)=\frac{C \operatorname{atan}(L)-C \operatorname{atan}(x)+D \operatorname{atan}(x)}{\operatorname{atan}(L)}$$
+\section[Basic principles for approximating differential equations]{Forming the residual} 
+	The fundamental idea is to seek an approximate solution $u$ in some space $V$,
+	$$
+	V=\operatorname{span}\left\{\psi_{0}(x), \ldots, \psi_{N}(x)\right\},
+	$$
+	which means that $u$ can always be expressed as a linear combination of the basis functions $\left\{\varphi_{i}\right\}_{i \in \mathcal{I}_{s}}$, with $\mathcal{I}_{s}$ as the index set $\{0, \ldots, N\}$ :
+	$$
+	u(x)=\sum_{j \in \mathcal{I}_{s}} c_{j} \psi_{j}(x)
+	$$
+	The coefficients $\left\{c_{i}\right\}_{i \in \mathcal{I}_{s}}$ are unknowns to be computed.
+	(Later, in Section 14, we will see that if we specify boundary values of $u$ different from zero, we must look for an approximate solution $u(x)=B(x)+$ $\sum_{j} c_{j} \psi_{j}(x)$, where $\sum_{j} c_{j} \psi_{j} \in V$ and $B(x)$ is some function for incorporating the right boundary values. Because of $B(x), u$ will not necessarily lie in $V$. This modification does not imply any difficulties.)
+	
+	We need principles for deriving $N+1$ equations to determine the $N+1$ unknowns $\left\{c_{i}\right\}_{i \in \mathcal{I}_{s}}$. When approximating a given function $f$ by $u=\sum_{j} c_{j} \varphi_{j}, \mathrm{a}$ key idea is to minimize the square norm of the approximation error $e=u-f$ or (equvalently) demand that $e$ is orthogonal to $V$. Working with $e$ is not so useful here since the approximation error in our case is $e=u_{e}-u$ and $u_{\mathrm{e}}$ is unknown. The only general indicator we have on the quality of the approximate solution is to what degree $u$ fulfills the differential equation. Inserting $u=\sum_{j} c_{j} \psi_{j}$ into $\mathcal{L}(u)$ reveals that the result is not zero, because $u$ is only likely to equal $u_{\mathrm{e}}$. The nonzero result,
+	$$
+	R=\mathcal{L}(u)=\mathcal{L}\left(\sum_{j} c_{j} \psi_{j}\right),
+	$$
+	is called the residual and measures the error in fulfilling the governing equation.
+	Various principles for determining $\left\{c_{i}\right\}_{i \in \mathcal{I}_{\text {s }}}$ try to minimize $R$ in some sense. Note that $R$ varies with $x$ and the $\left\{c_{i}\right\}_{i \in \mathcal{I}_{s}}$ parameters. We may write this dependence explicitly as
+	$$
+	R=R\left(x ; c_{0}, \ldots, c_{N}\right)
+	$$
+	Below, we present three principles for making $R$ small: a least squares method, a projection or Galerkin method, and a collocation or interpolation method.
+\section[Basic principles for approximating differential equations]{The least squares method} 
+The least-squares method aims to find $\left\{c_{i}\right\}_{i \in \mathcal{I}_{s}}$ such that the square norm of the residual
+$$
+\|R\|=(R, R)=\int_{\Omega} R^{2} \mathrm{~d} x
+$$
+is minimized. By introducing an inner product of two functions $f$ and $g$ on $\Omega$ as
+$$
+(f, g)=\int_{\Omega} f(x) g(x) \mathrm{d} x,
+$$
+the least-squares method can be defined as
+$$
+\min _{c_{0}, \ldots, c_{N}} E=(R, R) .
+$$
+Differentiating with respect to the free parameters $\left\{c_{i}\right\}_{i \in \mathcal{I}_{s}}$ gives the $N+1$ equations
+$$
+\int_{\Omega} 2 R \frac{\partial R}{\partial c_{i}} \mathrm{~d} x=0 \quad \Leftrightarrow \quad\left(R, \frac{\partial R}{\partial c_{i}}\right)=0, \quad i \in \mathcal{I}_{s}
+$$
+\section[Basic principles for approximating differential equations]{The Galerkin method} 
+The least-squares principle is equivalent to demanding the error to be orthogonal to the space $V$ when approximating a function $f$ by $u \in V$. With a differential equation we do not know the true error so we must instead require the residual $R$ to be orthogonal to $V$. This idea implies seeking $\left\{c_{i}\right\}_{i \in \mathcal{I}_{s}}$ such that
+$$
+(R, v)=0, \quad \forall v \in V .
+$$
+This is the Galerkin method for differential equations.
+This statement is equivalent to $R$ being orthogonal to the $N+1$ basis functions only:
+$$
+\left(R, \psi_{i}\right)=0, \quad i \in \mathcal{I}_{s},
+$$
+resulting in $N+1$ equations for determining $\left\{c_{i}\right\}_{i \in \mathcal{I}_{s}}$.
+\section[Basic principles for approximating differential equations]{The Method of Weighted Residuals} 
+A generalization of the Galerkin method is to demand that $R$ is orthogonal to some space $W$, but not necessarily the same space as $V$ where we seek the unknown function. This generalization is naturally called the method of weighted residuals:
+$$
+(R, v)=0, \quad \forall v \in W .
+$$
+If $\left\{w_{0}, \ldots, w_{N}\right\}$ is a basis for $W$, we can equivalently express the method of weighted residuals as
+
+$$
+\left(R, w_{i}\right)=0, \quad i \in \mathcal{I}_{s} .
+$$
+The result is $N+1$ equations for $\left\{c_{i}\right\}_{i \in \mathcal{I}_{s}}$.
+The least-squares method can also be viewed as a weighted residual method with $w_{i}=\partial R / \partial c_{i}$.
+\begin{mybox}
+	\textbf{Variational formulation of the continuous problem.}
+	
+	\noindent Formulations like (140) (or (141)) and (138) (or (139)) are known as variational formulations. These equations are in this text primarily used for a numerical approximation $u \in V$, where $V$ is a finite-dimensional space with dimension $N+1$. However, we may also let $V$ be an infinite-dimensional space containing the exact solution $u_{e}(x)$ such that also $u_{e}$ fulfills the same variational formulation. The variational formulation is in that case a mathematical way of stating the problem and acts as alternative to the usual formulation of a differential equation with initial and/or boundary conditions.
+\end{mybox}
+
+
+\section[Basic principles for approximating differential equations]{Test and Trial Functions} 
+\noindent In the context of the Galerkin method and the method of weighted residuals it is common to use the name trial function for the approximate $u=\sum_{j} c_{j} \psi_{j}$. The space containing the trial function is known as the trial space. The function $v$ entering the orthogonality requirement in the Galerkin method and the method of weighted residuals is called test function, and so are the $\psi_{i}$ or $w_{i}$ functions that are used as weights in the inner products with the residual. The space where the test functions comes from is naturally called the test space.
+
+We see that in the method of weighted residuals the test and trial spaces are different and so are the test and trial functions. In the Galerkin method the test and trial spaces are the same (so far).
+
+\begin{mybox}
+	\textbf{Remark.}
+	
+	\noindent It may be subject to debate whether it is only the form of (140) or (138) after integration by parts, as explained in Section $11.10$, that qualifies for the term variational formulation. The result after integration by parts is what is obtained after taking the first variation of an optimization problem, see Section 11.13. However, here we use variational formulation as a common term for formulations which, in contrast to the differential equation $R=0$, instead demand that an average of $R$ is zero: $(R, v)=0$ for all $v$ in some space.
+\end{mybox}
+
+\section[Basic principles for approximating differential equations]{The collocation} 
+\noindent The idea of the collocation method is to demand that $R$ vanishes at $N+1$ selected points $x_{0}, \ldots, x_{N}$ in $\Omega$ :
+$$
+R\left(x_{i} ; c_{0}, \ldots, c_{N}\right)=0, \quad i \in \mathcal{I}_{s} .
+$$
+The collocation method can also be viewed as a method of weighted residuals with Dirac delta functions as weighting functions. Let $\delta\left(x-x_{i}\right)$ be the Dirac delta function centered around $x=x_{i}$ with the properties that $\delta\left(x-x_{i}\right)=0$ for $x \neq x_{i}$ and
+$$
+\int_{\Omega} f(x) \delta\left(x-x_{i}\right) \mathrm{d} x=f\left(x_{i}\right), \quad x_{i} \in \Omega
+$$
+Intuitively, we may think of $\delta\left(x-x_{i}\right)$ as a very peak-shaped function around $x=x_{i}$ with integral 1, roughly visualized in Figure 46 . Because of (143), we can let $w_{i}=\delta\left(x-x_{i}\right)$ be weighting functions in the method of weighted residuals, and (141) becomes equivalent to (142).
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.7\linewidth]{img_46}
+	\caption{Approximation of delta functions by narrow Gaussian functions.}
+	\label{fig:img_46}
+\end{figure}
+
+\noindent The subdomain collocation method. The idea of this approach is to demand the integral of $R$ to vanish over $N+1$ subdomains $\Omega_{i}$ of $\Omega$ :
+$$
+\int_{\Omega_{i}} R \mathrm{~d} x=0, \quad i \in \mathcal{I}_{s}
+$$
+This statement can also be expressed as a weighted residual method
+$$
+\int_{\Omega} R w_{i} \mathrm{~d} x=0, \quad i \in \mathcal{I}_{s},
+$$
+where $w_{i}=1$ for $x \in \Omega_{i}$ and $w_{i}=0$ otherwise.
+\section[Basic principles for approximating differential equations]{Examples on using the principles} 
+Let us now apply global basis functions to illustrate the principles for minimizing $R$.
+The model problem. We consider the differential equation problem
+$$
+-u^{\prime \prime}(x)=f(x), \quad x \in \Omega=[0, L], \quad u(0)=0, u(L)=0
+$$
+Basis functions. Our choice of basis functions $\psi_{i}$ for $V$ is
+$$
+\psi_{i}(x)=\sin \left((i+1) \pi \frac{x}{L}\right), \quad i \in \mathcal{I}_{s} .
+$$
+An important property of these functions is that $\psi_{i}(0)=\psi_{i}(L)=0$, which means that the boundary conditions on $u$ are fulfilled:
+$$
+u(0)=\sum_{j} c_{j} \psi_{j}(0)=0, \quad u(L)=\sum_{j} c_{j} \psi_{j}(L)=0 .
+$$
+Another nice property is that the chosen sine functions are orthogonal on $\Omega$ :
+$$
+\int_{0}^{L} \sin \left((i+1) \pi \frac{x}{L}\right) \sin \left((j+1) \pi \frac{x}{L}\right) \mathrm{d} x= \begin{cases}\frac{1}{2} L & i=j \\ 0, & i \neq j\end{cases}
+$$
+provided $i$ and $j$ are integers.
+The residual. We can readily calculate the following explicit expression for the residual:
+$$
+\begin{aligned}
+	R\left(x ; c_{0}, \ldots, c_{N}\right) &=u^{\prime \prime}(x)+f(x), \\
+	&=\frac{d^{2}}{d x^{2}}\left(\sum_{j \in \mathcal{I}_{s}} c_{j} \psi_{j}(x)\right)+f(x), \\
+	&=\sum_{j \in \mathcal{I}_{s}} c_{j} \psi_{j}^{\prime \prime}(x)+f(x) .
+\end{aligned}
+$$
+
+The least squares method. The equations (137) in the least squares method require an expression for $\partial R / \partial c_{i}$. We have
+$$
+\frac{\partial R}{\partial c_{i}}=\frac{\partial}{\partial c_{i}}\left(\sum_{j \in \mathcal{I}_{s}} c_{j} \psi_{j}^{\prime \prime}(x)+f(x)\right)=\sum_{j \in \mathcal{I}_{s}} \frac{\partial c_{j}}{\partial c_{i}} \psi_{j}^{\prime \prime}(x)=\psi_{i}^{\prime \prime}(x) .
+$$
+The governing equations for $\left\{c_{i}\right\}_{i \in \mathcal{I}_{s}}$ are then
+$$
+\left(\sum_{j} c_{j} \psi_{j}^{\prime \prime}+f, \psi_{i}^{\prime \prime}\right)=0, \quad i \in \mathcal{I}_{s},
+$$
+which can be rearranged as
+$$
+\sum_{j \in \mathcal{I}_{s}}\left(\psi_{i}^{\prime \prime}, \psi_{j}^{\prime \prime}\right) c_{j}=-\left(f, \psi_{i}^{\prime \prime}\right), \quad i \in \mathcal{I}_{s} .
+$$
+This is nothing but a linear system
+$$
+\sum_{j \in \mathcal{I}_{s}} A_{i, j} c_{j}=b_{i}, \quad i \in \mathcal{I}_{s},
+$$
+with
+$$
+\begin{aligned}
+	A_{i, j} &=\left(\psi_{i}^{\prime \prime}, \psi_{j}^{\prime \prime}\right) \\
+	&=\pi^{4}(i+1)^{2}(j+1)^{2} L^{-4} \int_{0}^{L} \sin \left((i+1) \pi \frac{x}{L}\right) \sin \left((j+1) \pi \frac{x}{L}\right) \mathrm{d} x \\
+	&= \begin{cases}\frac{1}{2} L^{-3} \pi^{4}(i+1)^{4} & i=j \\
+		0, & i \neq j\end{cases} \\
+	b_{i} &=-\left(f, \psi_{i}^{\prime \prime}\right)=(i+1)^{2} \pi^{2} L^{-2} \int_{0}^{L} f(x) \sin \left((i+1) \pi \frac{x}{L}\right) \mathrm{d} x
+\end{aligned}
+$$
+Since the coefficient matrix is diagonal we can easily solve for
+$$
+c_{i}=\frac{2 L}{\pi^{2}(i+1)^{2}} \int_{0}^{L} f(x) \sin \left((i+1) \pi \frac{x}{L}\right) \mathrm{d} x .
+$$
+With the special choice of $f(x)=2$ can be calculated in sympy by
+
+\begin{lstlisting}[numbers=none]
+	from sympy import *
+	import sys
+	i, j = symbols('i j', integer=True)
+	x, L = symbols('x L')
+	f = 2
+	a = 2*L/(pi**2*(i+1)**2)
+	c_i = a*integrate(f*sin((i+1)*pi*x/L), (x, 0, L))
+	c_i = simplify(c_i)
+	print c_i
+\end{lstlisting}
+
+The answer becomes
+$$
+c_{i}=4 \frac{L^{2}\left((-1)^{i}+1\right)}{\pi^{3}\left(i^{3}+3 i^{2}+3 i+1\right)}
+$$
+Now, $1+(-1)^{i}=0$ for $i$ odd, so only the coefficients with even index are nonzero. Introducing $i=2 k$ for $k=0, \ldots, N / 2$ to count the relevant indices (for $N$ odd, $k$ goes to $(N-1) / 2)$, we get the solution
+$$
+u(x)=\sum_{k=0}^{N / 2} \frac{8 L^{2}}{\pi^{3}(2 k+1)^{3}} \sin \left((2 k+1) \pi \frac{x}{L}\right)
+$$
+The coefficients decay very fast: $c_{2}=c_{0} / 27, c_{4}=c_{0} / 125$. The solution will therefore be dominated by the first term,
+$$
+u(x) \approx \frac{8 L^{2}}{\pi^{3}} \sin \left(\pi \frac{x}{L}\right)
+$$
+The Galerkin method. The Galerkin principle (138) applied to (146) consists of inserting our special residual (149) in (138)
+$$
+\left(u^{\prime \prime}+f, v\right)=0, \quad \forall v \in V,
+$$
+or
+$$
+\left(u^{\prime \prime}, v\right)=-(f, v), \quad \forall v \in V .
+$$
+This is the variational formulation, based on the Galerkin principle, of our differential equation. The $\forall v \in V$ requirement is equivalent to demanding the equation $\left(u^{\prime \prime}, v\right)=-(f, v)$ to be fulfilled for all basis functions $v=\psi_{i}, i \in \mathcal{I}_{s}$, see (138) and (139). We therefore have
+$$
+\left(\sum_{j \in \mathcal{I}_{s}} c_{j} \psi_{j}^{\prime \prime}, \psi_{i}\right)=-\left(f, \psi_{i}\right), \quad i \in \mathcal{I}_{s} .
+$$
+This equation can be rearranged to a form that explicitly shows that we get a linear system for the unknowns $\left\{c_{i}\right\}_{i \in \mathcal{I}_{s}}$ :
+$$
+\sum_{j \in \mathcal{I}_{s}}\left(\psi_{i}, \psi_{j}^{\prime \prime}\right) c_{j}=\left(f, \psi_{i}\right), \quad i \in \mathcal{I}_{s} .
+$$
+For the particular choice of the basis functions (147) we get in fact the same linear system as in the least squares method because $\psi^{\prime \prime}=-(i+1)^{2} \pi^{2} L^{-2} \psi$.
+
+The collocation method. For the collocation method (142) we need to decide upon a set of $N+1$ collocation points in $\Omega$. A simple choice is to use uniformly spaced points: $x_{i}=i \Delta x$, where $\Delta x=L / N$ in our case $(N \geq 1)$. However, these points lead to at least two rows in the matrix consisting of zeros (since $\psi_{i}\left(x_{0}\right)=0$ and $\psi_{i}\left(x_{N}\right)=0$ ), thereby making the matrix singular and non-invertible. This forces us to choose some other collocation points, e.g., random points or points uniformly distributed in the interior of $\Omega$. Demanding the residual to vanish at these points leads, in our model problem (146), to the equations
+$$
+-\sum_{j \in \mathcal{I}_{s}} c_{j} \psi_{j}^{\prime \prime}\left(x_{i}\right)=f\left(x_{i}\right), \quad i \in \mathcal{I}_{s},
+$$
+which is seen to be a linear system with entries
+$$
+A_{i, j}=-\psi_{j}^{\prime \prime}\left(x_{i}\right)=(j+1)^{2} \pi^{2} L^{-2} \sin \left((j+1) \pi \frac{x_{i}}{L}\right)
+$$
+in the coefficient matrix and entries $b_{i}=2$ for the right-hand side (when $f(x)=2)$.
+
+The special case of $N=0$ can sometimes be of interest. A natural choice is then the midpoint $x_{0}=L / 2$ of the domain, resulting in $A_{0,0}=-\psi_{0}^{\prime \prime}\left(x_{0}\right)=\pi^{2} L^{-2}$, $f\left(x_{0}\right)=2$, and hence $c_{0}=2 L^{2} / \pi^{2} .$
+
+Comparison. In the present model problem, with $f(x)=2$, the exact solution is $u(x)=x(L-x)$, while for $N=0$ the Galerkin and least squares method result in $u(x)=8 L^{2} \pi^{-3} \sin (\pi x / L)$ and the collocation method leads to $u(x)=$ $2 L^{2} \pi^{-2} \sin (\pi x / L)$. Since all methods fulfill the boundary conditions $u(0)=$ $u(L)=0$, we expect the largest discrepancy to occur at the midpoint of the domain: $x=L / 2$. The error at the midpoint becomes $-0.008 L^{2}$ for the Galerkin and least squares method, and $0.047 L^{2}$ for the collocation method.
+\section[Basic principles for approximating differential equations]{Integration by parts} 
+A problem arises if we want to apply popular finite element functions to solve our model problem (146) by the standard least squares, Galerkin, or collocation methods: the piecewise polynomials $\psi_{i}(x)$ have discontinuous derivatives at the cell boundaries which makes it problematic to compute the second-order derivative. This fact actually makes the least squares and collocation methods less suitable for finite element approximation of the unknown function. (By rewriting the equation $-u^{\prime \prime}=f$ as a system of two first-order equations, $u^{\prime}=v$ and $-v^{\prime}=$ $f$, the least squares method can be applied. Also, differentiating discontinuous functions can actually be handled by distribution theory in mathematics.) The Galerkin method and the method of weighted residuals can, however, be applied together with finite element basis functions if we use integration by parts as a means for transforming a second-order derivative to a first-order one.
+Consider the model problem (146) and its Galerkin formulation
+$$
+-\left(u^{\prime \prime}, v\right)=(f, v) \quad \forall v \in V .
+$$
+
+Using integration by parts in the Galerkin method, we can move a derivative of $u$ onto $v$ :
+$$
+\begin{aligned}
+	\int_{0}^{L} u^{\prime \prime}(x) v(x) \mathrm{d} x &=-\int_{0}^{L} u^{\prime}(x) v^{\prime}(x) \mathrm{d} x+\left[v u^{\prime}\right]_{0}^{L} \\
+	&=-\int_{0}^{L} u^{\prime}(x) v^{\prime}(x) \mathrm{d} x+u^{\prime}(L) v(L)-u^{\prime}(0) v(0) .
+\end{aligned}
+$$
+Usually, one integrates the problem at the stage where the $u$ and $v$ functions enter the formulation. Alternatively, but less common, we can integrate by parts in the expressions for the matrix entries:
+$$
+\begin{aligned}
+	\int_{0}^{L} \psi_{i}(x) \psi_{j}^{\prime \prime}(x) \mathrm{d} x &=-\int_{0}^{L} \psi_{i}^{\prime}(x) \psi_{j}^{\prime}(x) d x+\left[\psi_{i} \psi_{j}^{\prime}\right]_{0}^{L} \\
+	&=-\int_{0}^{L} \psi_{i}^{\prime}(x) \psi_{j}^{\prime}(x) \mathrm{d} x+\psi_{i}(L) \psi_{j}^{\prime}(L)-\psi_{i}(0) \psi_{j}^{\prime}(0) .
+\end{aligned}
+$$
+Integration by parts serves to reduce the order of the derivatives and to make the coefficient matrix symmetric since $\left(\psi_{i}^{\prime}, \psi_{j}^{\prime}\right)=\left(\psi_{i}^{\prime}, \psi_{j}^{\prime}\right)$. The symmetry property depends on the type of terms that enter the differential equation. As will be seen later in Section 15, integration by parts also provides a method for implementing boundary conditions involving $u^{\prime}$.
+
+With the choice (147) of basis functions we see that the "boundary terms" $\psi_{i}(L) \psi_{j}^{\prime}(L)$ and $\psi_{i}(0) \psi_{j}^{\prime}(0)$ vanish since $\psi_{i}(0)=\psi_{i}(L)=0$.
+
+Weak form. Since the variational formulation after integration by parts make weaker demands on the differentiability of $u$ and the basis functions $\psi_{i}$, the resulting integral formulation is referred to as a weak form of the differential equation problem. The original variational formulation with second-order derivatives, or the differential equation problem with second-order derivative, is then the strong form, with stronger requirements on the differentiability of the functions.
+
+For differential equations with second-order derivatives, expressed as variational formulations and solved by finite element methods, we will always perform integration by parts to arrive at expressions involving only first-order derivatives.
+\section[Basic principles for approximating differential equations]{Boundary function} 
+So far we have assumed zero Dirichlet boundary conditions, typically $u(0)=$ $u(L)=0$, and we have demanded that $\psi_{r}(0)=\psi_{i}(L)=0$ for $i \in \mathcal{I}_{s}$. What about a boundary condition like $u(L)=D \neq 0$ ? This condition immediately faces a problem: $u=\sum_{j} c_{j} \varphi_{j}(L)=0$ since all $\varphi_{i}(L)=0$.
+
+A boundary condition of the form $u(L)=D$ can be implemented by demanding that all $\psi_{n}(L)=0$, but adding a boundary function $B(x)$ with the right boundary value, $B(L)=D$, to the expansion for $u$ :
+
+$$
+u(x)=B(x)+\sum_{j \in \mathcal{I}_{s}} c_{j} \psi_{j}(x) .
+$$
+This $u$ gets the right value at $x=L$ :
+$$
+u(L)=B(L)+\sum_{j \in I_{a}} c_{j} \psi_{j}(L)=B(L)=D .
+$$
+The idea is that for any boundary where $u$ is known we demand $\psi_{y}$ to vanish and construct a function $B(x)$ to attain the boundary value of $u$. There are no restrictions how $B(x)$ varies with $x$ in the interior of the domain, so this variation needs to be constructed in some way.
+
+For example, with $u(0)=0$ and $u(L)=D$, we can choose $B(x)=x D / L$, since this form ensures that $B(x)$ fulfills the boundary conditions: $B(0)=0$ and $B(L)=D$. The unknown function is then sought on the form
+$$
+u(x)=\frac{x}{L} D+\sum_{j \in \mathcal{I}_{*}} c_{j} \psi_{j}(x)
+$$
+with $\psi_{i}(0)=\psi_{1}(L)=0$.
+The $B(x)$ function can be chosen in many ways as long as its boundary values are correct. For example, $B(x)=D(x / L)^{p}$ for any power $p$ will work fine in the above example.
+
+As another example, consider a domain $\Omega=[a, b]$ where the boundary conditions are $u(a)=U_{a}$ and $u(b)=U_{b}$. A class of possible $B(x)$ functions is
+$$
+B(x)=U_{a}+\frac{U_{b}-U_{a}}{(b-a)^{\mathrm{p}}}(x-a)^{\mathrm{p}}, \quad p>0 .
+$$
+Real applications will most likely use the simplest version, $p=1$, but here such a $p$ parameter was included to demonstrate the ambiguity in the construction of $B(x)$.
+
+Summary.
+The general procedure of incorporating Dirichlet boundary conditions goes as follows. Let $O \Omega_{E}$ be the part(s) of the boundary OS of the domain $\Omega$ where $u$ is specified. Set $\psi_{u}=0$ at the points in OOR and seek $u$ as
+$$
+u(x)=B(x)+\sum_{j \in \mathcal{I}_{s}} c_{y} \psi_{j}(x)
+$$
+where $B(x)$ equals the boundary conditions on $u$ at $\partial \Omega_{E}$.
+Remark. With the $B(x)$ term, $u$ does not in general lie in $V=\operatorname{span}\left\{\psi_{0}, \ldots, \psi_{N}\right\}$ anymore. Moreover, when a prescribed value of $u$ at the boundary, say u( $a)=U_{a}$ is different from zero, it does not make sense to say that $u$ lies in a vector space, because this space does not obey the requirements of addition and scalar multiplication. For example, $2 u$ does not lie in the space since its boundary value is $2 U_{a}$, which is incorrect. It only makes sense to split $u$ in two parts, as done above, and have the unknown part $\sum_{j} c_{j} \psi_{j}$ in a proper function space.
+\section[Basic principles for approximating differential equations]{Abstract notatiom for variational formulations} 
+We have seen that variational formulations end up with a formula involving $u$ and $v$, such as $\left(u^{\prime}, v^{\prime}\right)$ and a formula involving $v$ and known functions, such as $(f, v)$. A widely used notation is to introduce an abstract variational statement written as $a(u, v)=L(v)$, where $a(u, v)$ is a so-called bilinear form involving all the terms that contain both the test and trial function, while $L(v)$ is a linear form containing all the terms without the trial function. For example, the statement
+$$
+\int_{\Omega} u^{\prime} v^{\prime} \mathrm{d} x=\int_{\Omega} f v \mathrm{~d} x \quad \text { or } \quad\left(u^{\prime}, v^{\prime}\right)=(f, v) \quad \forall v \in V
+$$
+can be written in abstract form: find $u$ such that
+$$
+a(u, v)=L(v) \quad \forall v \in V
+$$
+where we have the definitions
+$$
+a(u, v)=\left(u^{\prime}, v^{\prime}\right), \quad L(v)=(f, v) \text {. }
+$$
+The term linear means that $L\left(\alpha_{1} v_{1}+\alpha_{2} v_{2}\right)=\alpha_{1} L\left(v_{1}\right)+\alpha_{2} L\left(v_{2}\right)$ for two test functions $v_{1}$ and $v_{2}$, and scalar parameters $\alpha_{1}$ and $\alpha_{2}$. Similarly, the term bilinear means that $a(u, v)$ is linear in both its arguments:
+$$
+\begin{aligned}
+	&a\left(\alpha_{1} u_{1}+\alpha_{2} u_{2}, v\right)=\alpha_{1} a\left(u_{1}, v\right)+\alpha_{2} a\left(u_{2}, v\right) \\
+	&a\left(u, \alpha_{1} v_{1}+\alpha_{2} v_{2}\right)=\alpha_{1} a\left(u, v_{1}\right)+\alpha_{2} a\left(u, v_{2}\right)
+\end{aligned}
+$$
+In nonlinear problems these linearity properties do not hold in general and the abstract notation is then $F(u ; v)=0$.
+
+The matrix system associated with $a(u, v)=L(v)$ can also be written in an abstract form by inserting $v=\psi_{i}$ and $u=\sum_{j} c_{j} \psi_{j}$ in $a(u, v)=L(v)$. Using the linear properties, we get
+$$
+\sum_{j \in \mathcal{I}_{s}} a\left(\psi_{j}, \psi_{i}\right) c_{j}=L\left(\psi_{i}\right), \quad i \in \mathcal{I}_{s}
+$$
+which is a linear system
+$$
+\sum_{j \in \mathcal{I}_{s}} A_{i, j} c_{j}=b_{i}, \quad i \in \mathcal{I}_{s}
+$$
+where
+$$
+A_{i, j}=a\left(\psi_{j}, \psi_{i}\right), \quad b_{i}=L\left(\psi_{i}\right)
+$$
+
+In many problems, $a(u, v)$ is symmetric such that $a\left(\psi_{j}, \psi_{i}\right)=a\left(\psi_{i}, \psi_{j}\right)$. In those cases the coefficient matrix becomes symmetric, $A_{i, j}=A_{j, i}$, a property that can simplify solution algorithms for linear systems and make them more stable in addition to saving memory and computations.
+
+The abstract notation $a(u, v)=L(v)$ for linear differential equation problems is much used in the literature and in description of finite element software (in particular the FEniCS documentation). We shall frequently summarize variational forms using this notation.
+\section[Basic principles for approximating differential equations]{Variational problems and optimization} 
+
+
+If $a(u, v)=a(v, u)$, it can be shown that the variational statement
+$$
+a(u, v)=L(v) \quad \forall v \in V,
+$$
+is equivalent to minimizing the functional
+$$
+F(v)=\frac{1}{2} a(v, v)-L(v)
+$$
+over all functions $v \in V$. That is,
+$$
+F(u) \leq F(v) \quad \forall v \in V .
+$$
+Inserting a $v=\sum_{j} c_{j} \psi_{j}$ turns minimization of $F(v)$ into minimization of a quadratic function
+$$
+\bar{F}\left(c_{0}, \ldots, c_{N}\right)=\sum_{j \in \mathcal{I}_{s}} \sum_{i \in \mathcal{I}_{\bar{s}}} a\left(\psi_{i}, \psi_{j}\right) c_{i} c_{j}-\sum_{j \in \mathcal{I}_{s}} L\left(\psi_{j}\right) c_{j}
+$$
+of $N+1$ parameters.
+Minimization of $\bar{F}$ implies
+$$
+\frac{\partial \bar{F}}{\partial c_{i}}=0, \quad i \in \mathcal{I}_{s} .
+$$
+After some algebra one finds
+$$
+\sum j \in \mathcal{I}_{s} a\left(\psi_{i}, \psi_{j}\right) c_{j}=L\left(\psi_{i}\right), \quad i \in \mathcal{I}_{s}
+$$
+which is the same system as that arising from $a(u, v)=L(v)$.
+Many traditional applications of the finite element method, especially in solid mechanics and structural analysis, start with formulating $F(v)$ from physical principles, such as minimization of energy, and then proceeds with deriving $a(u, v)=L(v)$, which is the equation usually desired in implementations.

@@ -1,0 +1,124 @@
+\contentsline {section}{Contents}{\footnotesize 3}{chapter*.1}%
+\contentsline {chapter}{\numberline {1}Approximation of vectors}{1}{chapter.1}%
+\contentsline {section}{\numberline {1.1}Approximation of planar vectors}{1}{section.1.1}%
+\contentsline {section}{\numberline {1.2}Approximation of general vectors}{3}{section.1.2}%
+\contentsline {chapter}{\numberline {2}Approximation of functions}{5}{chapter.2}%
+\contentsline {section}{\numberline {2.1}The least squares method}{5}{section.2.1}%
+\contentsline {section}{\numberline {2.2}The projection (or Galerkin) method}{6}{section.2.2}%
+\contentsline {section}{\numberline {2.3}Example: linear approximation}{6}{section.2.3}%
+\contentsline {section}{\numberline {2.4}Implementation of the least squares method}{7}{section.2.4}%
+\contentsline {section}{\numberline {2.5}Perfect approximation}{8}{section.2.5}%
+\contentsline {section}{\numberline {2.6}Ill-conditioning}{8}{section.2.6}%
+\contentsline {section}{\numberline {2.7}Fourier series}{9}{section.2.7}%
+\contentsline {section}{\numberline {2.8}Orthogonal basis functions}{10}{section.2.8}%
+\contentsline {section}{\numberline {2.9}Numerical computations}{11}{section.2.9}%
+\contentsline {section}{\numberline {2.10}The interpolation (or collocation) method}{12}{section.2.10}%
+\contentsline {section}{\numberline {2.11}Lagrange polynomials}{13}{section.2.11}%
+\contentsline {chapter}{\numberline {3}Finite element basis functions}{19}{chapter.3}%
+\contentsline {section}{\numberline {3.1}Elements and nodes}{19}{section.3.1}%
+\contentsline {section}{\numberline {3.2}The basis functions}{21}{section.3.2}%
+\contentsline {section}{\numberline {3.3}Example on piecewise quadratic finite element functions}{22}{section.3.3}%
+\contentsline {section}{\numberline {3.4}Example on piecewise linear finite element functions}{23}{section.3.4}%
+\contentsline {section}{\numberline {3.5}Example on piecewise cubic finite element basis functions}{24}{section.3.5}%
+\contentsline {section}{\numberline {3.6}Calculating the linear system}{25}{section.3.6}%
+\contentsline {section}{\numberline {3.7}Assembly of elementwise computations}{28}{section.3.7}%
+\contentsline {section}{\numberline {3.8}Mapping to a reference element}{30}{section.3.8}%
+\contentsline {section}{\numberline {3.9}Example: Integration over a reference element}{31}{section.3.9}%
+\contentsline {chapter}{\numberline {4}Implementation}{33}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Integration}{33}{section.4.1}%
+\contentsline {section}{\numberline {4.2}Linear system assembly and solution}{34}{section.4.2}%
+\contentsline {section}{\numberline {4.3}Example on computing symbolic approximations}{35}{section.4.3}%
+\contentsline {section}{\numberline {4.4}Comparison with finite elements and interpolation/- collocation}{35}{section.4.4}%
+\contentsline {section}{\numberline {4.5}Example on computing numerical approximations}{35}{section.4.5}%
+\contentsline {section}{\numberline {4.6}The structure of the coefficient matrix}{36}{section.4.6}%
+\contentsline {section}{\numberline {4.7}Applications}{37}{section.4.7}%
+\contentsline {section}{\numberline {4.8}Sparse matrix storage and solution}{38}{section.4.8}%
+\contentsline {chapter}{\numberline {5}Comparison of finite element and finite difference approximation}{41}{chapter.5}%
+\contentsline {section}{\numberline {5.1}Finite difference approximation of given functions}{41}{section.5.1}%
+\contentsline {section}{\numberline {5.2}Finite difference interpretation of a finite element approximation}{41}{section.5.2}%
+\contentsline {section}{\numberline {5.3}Making finite elements behave as finite differences}{43}{section.5.3}%
+\contentsline {chapter}{\numberline {6}A generalized element concept}{45}{chapter.6}%
+\contentsline {section}{\numberline {6.1}Cells, vertices, and degrees of freedom}{45}{section.6.1}%
+\contentsline {section}{\numberline {6.2}Extended finite element concept}{45}{section.6.2}%
+\contentsline {section}{\numberline {6.3}Implementation}{46}{section.6.3}%
+\contentsline {section}{\numberline {6.4}Computing the error of the approximation}{46}{section.6.4}%
+\contentsline {section}{\numberline {6.5}Example: Cubic Hermite polynomials}{47}{section.6.5}%
+\contentsline {chapter}{\numberline {7}Numerical integration}{49}{chapter.7}%
+\contentsline {section}{\numberline {7.1}Newton-Cotes rules}{49}{section.7.1}%
+\contentsline {section}{\numberline {7.2}Gauss-Legendre rules with optimized points}{49}{section.7.2}%
+\contentsline {chapter}{\numberline {8}Approximation of functions in 2D}{51}{chapter.8}%
+\contentsline {section}{\numberline {8.1}2D basis functions as tensor products of 1D functions}{51}{section.8.1}%
+\contentsline {section}{\numberline {8.2}Example: Polynomial basis in 2D}{52}{section.8.2}%
+\contentsline {section}{\numberline {8.3}Implementation}{53}{section.8.3}%
+\contentsline {section}{\numberline {8.4}Extension to 3D}{54}{section.8.4}%
+\contentsline {chapter}{\numberline {9}Finite elements in 2D and 3D}{55}{chapter.9}%
+\contentsline {section}{\numberline {9.1}Basis functions over triangles in the physical domain}{56}{section.9.1}%
+\contentsline {section}{\numberline {9.2}Basis functions over triangles in the reference cell}{56}{section.9.2}%
+\contentsline {section}{\numberline {9.3}Affine mapping of the reference cell}{59}{section.9.3}%
+\contentsline {section}{\numberline {9.4}Isoparametric mapping of the reference cell}{60}{section.9.4}%
+\contentsline {section}{\numberline {9.5}Computing integrals}{61}{section.9.5}%
+\contentsline {chapter}{\numberline {10}Exercises}{63}{chapter.10}%
+\contentsline {chapter}{\numberline {11}Basic principles for approximating differential equations}{1}{chapter.11}%
+\contentsline {section}{\numberline {11.1}Differential equation models}{1}{section.11.1}%
+\contentsline {section}{\numberline {11.2}Basic principles for approximating differential equations}{2}{section.11.2}%
+\contentsline {section}{\numberline {11.3}Forming the residual}{3}{section.11.3}%
+\contentsline {section}{\numberline {11.4}The least squares method}{3}{section.11.4}%
+\contentsline {section}{\numberline {11.5}The Galerkin method}{3}{section.11.5}%
+\contentsline {section}{\numberline {11.6}Basic principles for approximating differential equations}{4}{section.11.6}%
+\contentsline {section}{\numberline {11.7}Test and Trial Functions}{4}{section.11.7}%
+\contentsline {section}{\numberline {11.8}The collocation}{4}{section.11.8}%
+\contentsline {section}{\numberline {11.9}Examples on using the principles}{5}{section.11.9}%
+\contentsline {section}{\numberline {11.10}Integration by parts}{7}{section.11.10}%
+\contentsline {section}{\numberline {11.11}Boundary function}{8}{section.11.11}%
+\contentsline {section}{\numberline {11.12}Abstract notatiom for variational formulations}{8}{section.11.12}%
+\contentsline {section}{\numberline {11.13}Basic principles for approximating differential equations}{9}{section.11.13}%
+\contentsline {chapter}{\numberline {12}Examples on variational formulations}{1}{chapter.12}%
+\contentsline {section}{\numberline {12.1}Variable coefficient}{1}{section.12.1}%
+\contentsline {section}{\numberline {12.2}First-order derivative in the equation and boundary condition}{2}{section.12.2}%
+\contentsline {section}{\numberline {12.3}Nonlinear coefficient}{3}{section.12.3}%
+\contentsline {section}{\numberline {12.4}Computing with Dirichlet and Neumann conditions}{3}{section.12.4}%
+\contentsline {section}{\numberline {12.5}When the numerical method is exact}{4}{section.12.5}%
+\contentsline {chapter}{\numberline {13}Computing with finite elements}{1}{chapter.13}%
+\contentsline {section}{\numberline {13.1}Finite element mesh and basis functions}{1}{section.13.1}%
+\contentsline {section}{\numberline {13.2}Computation in the global physical domain}{1}{section.13.2}%
+\contentsline {section}{\numberline {13.3}Comparison with a finite difference discretization}{3}{section.13.3}%
+\contentsline {section}{\numberline {13.4}Cellwise computations}{3}{section.13.4}%
+\contentsline {chapter}{\numberline {14}Boundary conditions: specified nonzero value}{90}{chapter.14}%
+\contentsline {section}{\numberline {14.1}General construction of a boundary function}{90}{section.14.1}%
+\contentsline {section}{\numberline {14.2}Example on computing with finite element-based a boundary function}{91}{section.14.2}%
+\contentsline {section}{\numberline {14.3}Modification of the linear system}{92}{section.14.3}%
+\contentsline {section}{\numberline {14.4}Symmetric modification of the linear system}{94}{section.14.4}%
+\contentsline {section}{\numberline {14.5}Modification of the element matrix and vector}{94}{section.14.5}%
+\contentsline {chapter}{\numberline {15}Boundary conditions: specified derivative}{1}{chapter.15}%
+\contentsline {section}{\numberline {15.1}Boundary conditions: specified derivative}{1}{section.15.1}%
+\contentsline {section}{\numberline {15.2}Boundary conditions: specified derivative}{1}{section.15.2}%
+\contentsline {section}{\numberline {15.3}Boundary conditions: specified derivative}{1}{section.15.3}%
+\contentsline {section}{\numberline {15.4}Direct computation of the global linear system}{2}{section.15.4}%
+\contentsline {section}{\numberline {15.5}Cellwise computations}{3}{section.15.5}%
+\contentsline {chapter}{\numberline {16}Implementation}{1}{chapter.16}%
+\contentsline {section}{\numberline {16.1}Implementation}{1}{section.16.1}%
+\contentsline {section}{\numberline {16.2}Example: constant right-hand side}{2}{section.16.2}%
+\contentsline {section}{\numberline {16.3}Finite elements}{3}{section.16.3}%
+\contentsline {chapter}{\numberline {17}Variational formulations in 2D and 3D}{1}{chapter.17}%
+\contentsline {section}{\numberline {17.1}Transformation to a reference cell in 2D and 3D}{2}{section.17.1}%
+\contentsline {section}{\numberline {17.2}Numerical integration}{3}{section.17.2}%
+\contentsline {section}{\numberline {17.3}Convenient formulas for P1 elements in 2D}{3}{section.17.3}%
+\contentsline {chapter}{\numberline {18}Summary}{1}{chapter.18}%
+\contentsline {chapter}{\numberline {19}Time-dependent problems}{1}{chapter.19}%
+\contentsline {section}{\numberline {19.1}Discretization in time by a Forward Euler scheme}{1}{section.19.1}%
+\contentsline {section}{\numberline {19.2}Variational forms}{2}{section.19.2}%
+\contentsline {section}{\numberline {19.3}Simplified notation for the solution at recent time levels}{2}{section.19.3}%
+\contentsline {section}{\numberline {19.4}Deriving the linear systems}{3}{section.19.4}%
+\contentsline {section}{\numberline {19.5}Computational algorithm}{3}{section.19.5}%
+\contentsline {section}{\numberline {19.6}Comparing P1 elements with the finite difference method}{4}{section.19.6}%
+\contentsline {section}{\numberline {19.7}Discretization in time by a Backward Euler scheme}{4}{section.19.7}%
+\contentsline {section}{\numberline {19.8}Dirichlet boundary conditions}{5}{section.19.8}%
+\contentsline {section}{\numberline {19.9}Example: Oscillating Dirichlet boundary condition}{6}{section.19.9}%
+\contentsline {section}{\numberline {19.10}Analysis of the discrete equations}{7}{section.19.10}%
+\contentsline {chapter}{\numberline {20}Systems of differential equations}{1}{chapter.20}%
+\contentsline {section}{\numberline {20.1}Systems of differential equations}{1}{section.20.1}%
+\contentsline {section}{\numberline {20.2}A worked example}{2}{section.20.2}%
+\contentsline {section}{\numberline {20.3}Identical function spaces for the unknowns}{2}{section.20.3}%
+\contentsline {section}{\numberline {20.4}Different function spaces for the unknowns}{5}{section.20.4}%
+\contentsline {section}{\numberline {20.5}Computations in 1D}{6}{section.20.5}%
+\contentsline {chapter}{\numberline {21}Exercises}{7}{chapter.21}%
